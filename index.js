@@ -6,6 +6,8 @@ const path = require('path');
 const inquirer = require('inquirer');
 const shell = require('shelljs');
 const chalk = require('chalk');
+//importamos funcion render
+const render = require('./utils/templates').render
 
 // obtener las opciones de los templates, entre parentesis la direccion de nuestra
 // carpeta contenera de los templates
@@ -33,8 +35,7 @@ const QUESTIONS = [
             return 'El nombre del proyecto solo puede tener 214 caracteres y empezar con minuscula o @'
         }
         
-        
-    },
+    }
 
 ];
 
@@ -58,10 +59,12 @@ inquirer.prompt(QUESTIONS).then(respuestas => {
     const templatePath = path.join(__dirname, 'templates', template);
     //definir directorio del proyecto
     const pathTarget = path.join(DIR_ACTUAL, proyecto);
-
-    createProject(pathTarget);
+    // si falla que se sala sin hacer nada
+    if(!createProject(pathTarget)) return;
 
     createDirectoriesFilesContent(templatePath, proyecto);
+
+    postProcess(templatePath, pathTarget);
 });
 
 function createProject(projectPath){
@@ -74,23 +77,52 @@ function createProject(projectPath){
     return true;
 }
 
-function createDirectoriesFilesContent(templatePath, proyecto){
-    // obtener la lista de direcotorios y ficheros del tempate seleccionado
+function createDirectoriesFilesContent(templatePath, projectName){
+    // obtener la lista de direcotorios y ficheros del template seleccionado
     const listFileDirectories = fs.readdirSync(templatePath);
     // recorrer la lista, item será un directorio o un fichero
     listFileDirectories.forEach(item => {
         const originalPath = path.join(templatePath, item);
-
-        //propiedad del fichero o directorio y segun sea hara difeentes acciones
-        const stats = rs.statSync(originalPath);
+        //propiedad del fichero o directorio y segun sea hara diferentes acciones
+        const stats = fs.statSync(originalPath);
         // path de escritura
-        const writePath = path.join(DIR_ACTUAL, proyecto, item);
+        const writePath = path.join(DIR_ACTUAL, projectName, item);
         // comprobar si es fichero o directorio
         if (stats.isFile()){
-
+            // cogemos contenido del fichero
+            let contents = fs.readFileSync(originalPath, 'utf-8');
+            // enviamos funcion(parametros, {objeto nombre del proyecto})
+            contents = render(contents, {projectName});
+            // escribimos el contenido del fichero
+            fs.writeFileSync(writePath, contents, 'utf-8');
+            //mostrar informacion en la instalacion, nombres, tamaños
+            const CREATE = chalk.green('CREATE');
+            const size = stats['size'];
+            console.log(`${CREATE} ${originalPath} (${size} bytes)`);
         } else if ( stats.isDirectory() ){
-            
+            fs.mkdirSync(writePath);
+            // funcion recursiva
+            createDirectoriesFilesContent(path.join(templatePath, item), path.join(projectName, item));
+
         }
 
     })
+}
+
+function postProcess(templatePath, pathTarget){
+    // comprobar en package.json del template si el proyecto es de node.js
+    const isNode = fs.existsSync(path.join(templatePath, 'package.json'));
+
+    if(isNode){
+        shell.cd(pathTarget);
+        console.log(chalk.green('instalando las dependencias en ${targetPath}'));
+        //ejecutamos npm install
+        const result = shell.exec('npm install');
+        if (result.code != 0){
+            return false;
+        }
+    }
+
+    // devuelve true si es un proyecto de node segun el package.json
+    //console.log(isNode);
 }
