@@ -1,0 +1,28 @@
+{
+  "name": "extra-node-cli-project-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CsrGamboa/extra-node-cli-project-generator.git"
+  },
+  "author": "kreando",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CsrGamboa/extra-node-cli-project-generator/issues"
+  },
+  "bin":{
+    "npm-cli-project-creator-csr": "./index.js"
+  },
+  "homepage": "https://github.com/CsrGamboa/extra-node-cli-project-generator#readme",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "ejs": "^3.1.6",
+    "inquirer": "^7.3.3",
+    "shelljs": "^0.8.4"
+  }
+}

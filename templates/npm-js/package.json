@@ -1,0 +1,17 @@
+{
+  "name": "npm-js",
+  "version": "1.0.0",
+  "description": "# Requirements * ... * ... * ...",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "mocha": "8.3.0"
+  },
+  "author": "pepito perez",
+  "license": "MIT"
+}
